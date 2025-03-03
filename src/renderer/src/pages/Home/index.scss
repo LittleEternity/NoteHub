@@ -1,39 +1,3 @@
-@import './base.css';
-
-body {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  background-image: url('./wavy-lines.svg');
-  background-size: cover;
-  user-select: none;
-}
-
-code {
-  font-weight: 600;
-  padding: 3px 5px;
-  border-radius: 2px;
-  background-color: var(--color-background-mute);
-  font-family:
-    ui-monospace,
-    SFMono-Regular,
-    SF Mono,
-    Menlo,
-    Consolas,
-    Liberation Mono,
-    monospace;
-  font-size: 85%;
-}
-
-#root {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  margin-bottom: 80px;
-}
-
 .logo {
   margin-bottom: 20px;
   -webkit-user-drag: none;
@@ -99,29 +63,28 @@ code {
 .action {
   flex-shrink: 0;
   padding: 6px;
-}
+  & .btn {
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    border: 1px solid transparent;
+    text-align: center;
+    font-weight: 600;
+    white-space: nowrap;
+    border-radius: 20px;
+    padding: 0 20px;
+    line-height: 38px;
+    font-size: 14px;
+    border-color: var(--ev-button-alt-border);
+    color: var(--ev-button-alt-text);
+    background-color: var(--ev-button-alt-bg);
 
-.action a {
-  cursor: pointer;
-  text-decoration: none;
-  display: inline-block;
-  border: 1px solid transparent;
-  text-align: center;
-  font-weight: 600;
-  white-space: nowrap;
-  border-radius: 20px;
-  padding: 0 20px;
-  line-height: 38px;
-  font-size: 14px;
-  border-color: var(--ev-button-alt-border);
-  color: var(--ev-button-alt-text);
-  background-color: var(--ev-button-alt-bg);
-}
-
-.action a:hover {
-  border-color: var(--ev-button-alt-hover-border);
-  color: var(--ev-button-alt-hover-text);
-  background-color: var(--ev-button-alt-hover-bg);
+    &:hover {
+      border-color: var(--ev-button-alt-hover-border);
+      color: var(--ev-button-alt-hover-text);
+      background-color: var(--ev-button-alt-hover-bg);
+    }
+  }
 }
 
 .versions {
