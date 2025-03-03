@@ -15,6 +15,15 @@ export default defineConfig({
         '@renderer': resolve('src/renderer/src')
       }
     },
-    plugins: [react()]
+    plugins: [react()],
+    server: {
+      proxy: {
+        '/dev': {
+          target: 'http://localhost:3000/', // 你的后端服务器地址
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/dev/, '')
+        }
+      }
+    }
   }
 })
