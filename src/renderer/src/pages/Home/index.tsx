@@ -1,25 +1,33 @@
-import './index.scss'
-import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom' // 新增导入
-import { getUserinfo } from '@renderer/utils/services/user'
+import root from './index.module.scss'
+import SideMenu from '@renderer/components/SideMenu'
+import Navigation from '@renderer/components/Navigation'
+import { Routes, Route, Outlet } from 'react-router-dom'
+import User from '@renderer/pages/User' // 用户
+import { useSelector } from 'react-redux'
+import { RootState } from '@renderer/store'
+import classNames from 'classnames'
+import { Layout } from 'antd'
+const { Header, Footer, Content } = Layout
 
 export default function Home() {
-  useEffect(() => {
-    getUserinfo({}).then((res) => {
-      console.log(res)
-    })
-  }, [])
-  const navigate = useNavigate() // 获取navigate函数
-  const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
-  const onAbout = (): void => {
-    navigate('/about') // 实现路由跳转
-  }
+  const collapsed = useSelector((state: RootState) => state.navigation.collapsed)
 
   return (
     <>
-      <div>
-        <span onClick={ipcHandle}>Ping</span>
-        <span onClick={onAbout}>About</span>
+      <div className={root.home}>
+        <SideMenu />
+        <div className={classNames(root.menu, { [root.collapsed]: collapsed })}></div>
+        <Layout className={root.layout}>
+          <Header className={root.header}>
+            <Navigation />
+          </Header>
+          <Content className={root.content}>
+            <Outlet />
+            <Routes>
+              <Route path="user" element={<User />} />
+            </Routes>
+          </Content>
+        </Layout>
       </div>
     </>
   )

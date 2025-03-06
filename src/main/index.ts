@@ -9,7 +9,10 @@ function createWindow(): void {
     width: 900,
     height: 670,
     show: false,
+    frame: false, // 隐藏默认边框和导航栏
+    titleBarStyle: 'hidden', // 在 macOS 上隐藏标题栏
     autoHideMenuBar: true,
+    trafficLightPosition: { x: 10, y: 12 }, // macOS 上显示 traffic light 按钮
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),

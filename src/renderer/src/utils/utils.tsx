@@ -35,3 +35,52 @@ export function getToken(): String {
 export function getUser(): Object {
   return JSON.parse(localStorage.getItem('userInfo') || '')
 }
+
+/**
+ * 节流函数
+ */
+export function throttled(fn: Function, delay: number = 50): Function {
+  let timer: any = null
+  let startTime: number = Date.now()
+  return function (this: any) {
+    // 当前时间
+    let curTime = Date.now()
+    // 从上一次到现在，还剩下多少多余时间
+    let remaining = delay - (curTime - startTime)
+    let context = this
+    let args = arguments
+    clearTimeout(timer)
+    if (remaining <= 0) {
+      fn.apply(context, args)
+      startTime = Date.now()
+    } else {
+      timer = setTimeout(fn, remaining)
+    }
+  }
+}
+
+/**
+ * 防抖函数
+ */
+export function debounce(func: Function, wait: number, immediate: boolean = false): Function {
+  let timeout: any = null
+  return function (this: any) {
+    let context = this
+    let args = arguments
+
+    if (timeout) clearTimeout(timeout) // timeout 不为null
+    if (immediate) {
+      let callNow: Boolean = !timeout // 第一次会立即执行，以后只有事件执行后才会再次触发
+      timeout = setTimeout(function () {
+        timeout = null
+      }, wait)
+      if (callNow) {
+        func.apply(context, args)
+      }
+    } else {
+      timeout = setTimeout(function () {
+        func.apply(context, args)
+      }, wait)
+    }
+  }
+}

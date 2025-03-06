@@ -1,0 +1,24 @@
+.user {
+  position: absolute;
+  bottom: 6px;
+  left: 0;
+  right: 1px;
+  height: var(--footer-height);
+  padding: 0 20px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  z-index: 1;
+  .name {
+    flex: 1;
+    margin-left: 6px;
+    font-size: 14px;
+    color: #333;
+  }
+}
+
+.dropdown {
+  width: 180px;
+  min-width: 180px !important;
+}

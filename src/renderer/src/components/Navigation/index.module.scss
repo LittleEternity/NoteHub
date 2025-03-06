@@ -1,0 +1,25 @@
+.nav {
+  position: relative;
+  width: 100%;
+}
+
+.menuNav {
+  position: absolute;
+  top: 2px;
+  left: 0;
+  bottom: 2px;
+  transform: translateX(-38px);
+  left: var(--menu-width);
+  height: 36px;
+  width: 36px;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  z-index: 2;
+  transition: left 0.2s ease-in-out;
+
+  &.collapsed {
+    left: 116px;
+  }
+}
