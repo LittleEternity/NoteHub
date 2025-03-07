@@ -1,5 +1,5 @@
 import root from './index.module.scss'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { DoubleLeftOutlined, DoubleRightOutlined, MenuOutlined } from '@ant-design/icons'
 import { Button } from 'antd'
 import { useDispatch, useSelector } from 'react-redux'

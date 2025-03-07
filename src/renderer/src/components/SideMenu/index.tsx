@@ -8,70 +8,66 @@ import { RootState } from '@renderer/store'
 import classNames from 'classnames'
 import { useState, useEffect } from 'react'
 import { throttled } from '@renderer/utils/utils'
+import { getNoteCatalog } from '@renderer/utils/services/note'
+import { useNavigate } from 'react-router-dom'
 
-type MenuItem = Required<MenuProps>['items'][number]
-
-const items: MenuItem[] = [
-  {
-    key: 'sub1',
-    label: 'Navigation 1',
-    icon: <AppstoreOutlined />,
-    children: [
-      { key: '11', label: 'Option 1' },
-      { key: '12', label: 'Option 2' },
-      {
-        key: 'sub11',
-        label: 'Submenu',
-        children: [
-          { key: '111', label: 'Option 3' },
-          { key: '112', label: 'Option 4' }
-        ]
-      }
-    ]
-  },
-  {
-    key: 'sub2',
-    label: 'Navigation 2',
-    icon: <AppstoreOutlined />,
-    children: [
-      { key: '21', label: 'Option 5' },
-      { key: '22', label: 'Option 6' },
-      {
-        key: 'sub21',
-        label: 'Submenu',
-        children: [
-          { key: '211', label: 'Option 7' },
-          { key: '212', label: 'Option 8' }
-        ]
-      }
-    ]
-  },
-  {
-    key: 'sub3',
-    label: 'Navigation 3',
-    icon: <AppstoreOutlined />,
-    children: [
-      { key: '31', label: 'Option 5' },
-      { key: '32', label: 'Option 6' },
-      {
-        key: 'sub31',
-        label: 'Submenu',
-        children: [
-          { key: '311', label: 'Option 7' },
-          { key: '312', label: 'Option 8' }
-        ]
-      }
-    ]
-  }
-]
+type MenuItem = Required<MenuProps>['items'][number] & {
+  children?: MenuItem[]
+}
 
 function SideMenu(): JSX.Element {
+  const [menuItems, setMenuItems] = useState<any>([])
+  const [selectedKeys, setSelectedKeys] = useState<string[]>([''])
   const [expanded, setExpanded] = useState(true)
   const collapsed = useSelector((state: RootState) => state.navigation.collapsed)
+  const navigate = useNavigate()
 
   const onClick: MenuProps['onClick'] = (e) => {
     console.log('click ', e)
+    handleSelect(e.key)
   }
+  const onOpenChange: MenuProps['onOpenChange'] = (keys) => {
+    console.log('onOpenChange ', keys)
+  }
+
+  const handleSelect = (key: string) => {
+    console.log('key', key)
+    navigate(`/${key}`)
+  }
+
+  // 获取笔记目录
+  const handleGetNoteCatalog = async (): Promise<void> => {
+    try {
+      const res: any = await getNoteCatalog()
+      const menuItems: MenuItem[] = handleGetMenuItems(res.data)
+      if (res.data.length > 0) {
+        setSelectedKeys([res.data[0].noteId])
+        setMenuItems(menuItems)
+      }
+    } catch (error) {
+      console.error('获取笔记目录失败:', error)
+    }
+  }
+  // 递归获取菜单
+  const handleGetMenuItems = (list: any[]): MenuItem[] => {
+    return list.map((itemData: any): MenuItem => {
+      const item: MenuItem = {
+        key: itemData.noteId,
+        label: itemData.title || '未命名',
+        icon: <AppstoreOutlined />
+      }
+
+      if (itemData.children && itemData.children.length > 0) {
+        item.children = handleGetMenuItems(itemData.children)
+      }
+
+      return item
+    })
+  }
+
+  useEffect(() => {
+    handleGetNoteCatalog()
+  }, [])
 
   useEffect((): void => {
     if (collapsed && expanded) {
@@ -103,15 +99,15 @@ function SideMenu(): JSX.Element {
             onMouseLeave={handleMouseLeave}
           >
             <Menu
-              onClick={onClick}
               className={root.menuPanel}
-              defaultSelectedKeys={['1']}
-              defaultOpenKeys={['sub1']}
+              selectedKeys={selectedKeys}
               mode="inline"
-              items={items}
+              items={menuItems}
+              onClick={onClick}
+              onOpenChange={onOpenChange}
             />
+            <User />
           </div>
-          <User />
         </div>
       </div>
     </>

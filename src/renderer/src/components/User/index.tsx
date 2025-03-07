@@ -21,11 +21,11 @@ const items: MenuProps['items'] = [
 ]
 
 function User(): JSX.Element {
-  const [userinfo, setUserInfo] = useState<any>({})
+  const [userInfo, setUserInfo] = useState<any>({})
   const navigate = useNavigate()
 
   useEffect(() => {
-    getUserinfo({}).then((res) => {
+    getUserinfo().then((res) => {
       setUserInfo(res.data)
     })
   }, [])
@@ -33,10 +33,11 @@ function User(): JSX.Element {
   const handleMenuClick: MenuProps['onClick'] = ({ key }) => {
     switch (key) {
       case '1': // 个人中心
-        navigate(`/home/user`)
+        navigate(`/user`)
         break
       case '2': // 退出登录
         localStorage.removeItem('token')
+        localStorage.removeItem('userInfo')
         navigate('/login')
         break
     }
@@ -49,8 +50,8 @@ function User(): JSX.Element {
         placement="top"
       >
         <div className={root.user}>
-          <Avatar size={24} src={userinfo.avatar || default_avatar} />
-          <span className={root.name}>{userinfo.name}</span>
+          <Avatar size={24} src={userInfo.avatar || default_avatar} />
+          <span className={root.name}>{userInfo.name}</span>
         </div>
       </Dropdown>
     </>

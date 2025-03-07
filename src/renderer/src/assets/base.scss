@@ -4,6 +4,9 @@
   --footer-height: 40px; // 底部栏高度
   --line-color: #ededed; // 线颜色，用于分割线、边框等
   --menu-width: 200px; // 菜单栏宽度
+  --note-cover-height: 150px; // 笔记封面高度
+  --ev-c-black: #1b1b1f;
+  --color-background: var(--ev-c-black);
 }
 
 *,
@@ -21,7 +24,6 @@ ul {
 body {
   min-height: 100vh;
   color: var(--color-text);
-  background: var(--color-background);
   line-height: 1.6;
   font-family:
     Inter,

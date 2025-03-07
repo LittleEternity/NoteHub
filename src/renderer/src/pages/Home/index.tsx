@@ -1,15 +1,17 @@
+import React from 'react'
 import root from './index.module.scss'
 import SideMenu from '@renderer/components/SideMenu'
 import Navigation from '@renderer/components/Navigation'
 import { Routes, Route, Outlet } from 'react-router-dom'
-import User from '@renderer/pages/User' // 用户
 import { useSelector } from 'react-redux'
 import { RootState } from '@renderer/store'
 import classNames from 'classnames'
 import { Layout } from 'antd'
-const { Header, Footer, Content } = Layout
+const { Header, Content } = Layout
+import User from '@renderer/pages/User' // 用户
+import Note from '@renderer/pages/Note' // 笔记
 
-export default function Home() {
+export default function Home(): React.ReactElement {
   const collapsed = useSelector((state: RootState) => state.navigation.collapsed)
 
   return (
@@ -25,6 +27,7 @@ export default function Home() {
             <Outlet />
             <Routes>
               <Route path="user" element={<User />} />
+              <Route path=":noteIds/*" element={<Note />} />
             </Routes>
           </Content>
         </Layout>

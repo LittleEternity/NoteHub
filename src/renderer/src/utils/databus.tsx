@@ -5,12 +5,21 @@ import { message } from 'antd'
 const databus = axios.create({
   timeout: 300000
 })
+// 用于标记是否正在刷新 token
+let isRefreshing = false
+// 定义 requests 数组中元素的类型
+type RequestCallback = (token: string) => void
+// 存储因 token 过期而挂起的请求
+let requests: RequestCallback[] = []
 
 databus.interceptors.request.use(
   (config: any) => {
+    let token = localStorage.getItem('token') || ''
+    let tokenType = localStorage.getItem('tokenType') || ''
+    token = tokenType + ' ' + token
     config.headers = {
       'Content-Type': 'application/json;charset=utf-8',
-      Authorization: localStorage.getItem('token') || '',
+      Authorization: token,
       ...config.propsHeaders
     }
     if (config.method === 'post') {
@@ -31,12 +40,53 @@ databus.interceptors.response.use(
   },
   async (error) => {
     const res = error.response
-    // 接口返回code为401，表示token过期，需要重新登录
-    if (res.data.code === 401) {
-      localStorage.setItem('token', '')
-      localStorage.setItem('userInfo', '')
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      redirectTo('/login')
+    const originalConfig = error.config
+
+    console.log(error)
+
+    // 接口返回 code 为 401，表示 token 过期，需要重新登录
+    if (res && res.data.code === 401) {
+      if (!isRefreshing) {
+        isRefreshing = true
+
+        try {
+          // 发送刷新 token 请求
+          const refreshToken = localStorage.getItem('refreshToken')
+          const { data } = await axios.post('/auth/refresh-token', { refreshToken })
+          if (!data) {
+            return Promise.reject(error)
+          }
+          // 更新 token
+          localStorage.setItem('token', data.accessToken.trim())
+
+          // 重新发起挂起的请求
+          requests.forEach((cb: Function) => cb(data.token))
+          requests = []
+
+          // 重新发起原请求
+          return databus(originalConfig)
+        } catch (refreshError) {
+          // 刷新 token 失败，清除 token 并跳转到登录页
+          localStorage.setItem('token', '')
+          localStorage.setItem('userInfo', '')
+          localStorage.setItem('refreshToken', '')
+          await new Promise((resolve) => setTimeout(resolve, 1000))
+          redirectTo('/login')
+          return Promise.reject(refreshError)
+        } finally {
+          isRefreshing = false
+        }
+      } else {
+        // 正在刷新 token，将请求挂起
+        return new Promise((resolve, reject) => {
+          requests.push((token: string) => {
+            originalConfig.headers.Authorization = token
+            databus(originalConfig)
+              .then((response) => resolve(response))
+              .catch((error) => reject(error))
+          })
+        })
+      }
     } else {
       message.error(res.data.message || '服务异常，请稍后再试')
     }

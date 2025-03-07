@@ -19,8 +19,11 @@ export default function Home() {
       password: values.password
     })
       .then((res) => {
-        const { token, tokenType } = res.data
-        localStorage.setItem('token', tokenType + ' ' + token.trim())
+        const { userId, email, name, avatar, token, tokenType, refreshToken } = res.data
+        localStorage.setItem('tokenType', tokenType)
+        localStorage.setItem('token', token.trim())
+        localStorage.setItem('refreshToken', refreshToken.trim())
+        localStorage.setItem('userInfo', JSON.stringify({ userId, email, name, avatar }))
         navigate('/')
       })
       .catch((res) => {
