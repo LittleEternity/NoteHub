@@ -1,18 +1,24 @@
-import { AppstoreOutlined, MailOutlined, SettingOutlined } from '@ant-design/icons'
+import { AppstoreOutlined } from '@ant-design/icons'
+import * as Icons from '@ant-design/icons'
 import type { MenuProps } from 'antd'
-import { Menu } from 'antd'
+import { Menu, Avatar } from 'antd'
 import User from '@renderer/components/User'
 import root from './index.module.scss'
 import { useSelector } from 'react-redux'
 import { RootState } from '@renderer/store'
 import classNames from 'classnames'
 import { useState, useEffect } from 'react'
-import { throttled } from '@renderer/utils/utils'
+import { throttled, isURL } from '@renderer/utils/utils'
 import { getNoteCatalog } from '@renderer/utils/services/note'
 import { useNavigate } from 'react-router-dom'
 
 type MenuItem = Required<MenuProps>['items'][number] & {
   children?: MenuItem[]
+}
+
+const DynamicIcon = ({ iconName }) => {
+  const IconComponent = Icons[iconName]
+  return IconComponent ? <IconComponent /> : null
 }
 
 function SideMenu(): JSX.Element {
@@ -23,7 +29,6 @@ function SideMenu(): JSX.Element {
   const navigate = useNavigate()
 
   const onClick: MenuProps['onClick'] = (e) => {
-    console.log('click ', e)
     handleSelect(e.key)
   }
   const onOpenChange: MenuProps['onOpenChange'] = (keys) => {
@@ -31,7 +36,6 @@ function SideMenu(): JSX.Element {
   }
 
   const handleSelect = (key: string) => {
-    console.log('key', key)
     navigate(`/${key}`)
   }
 
@@ -41,8 +45,10 @@ function SideMenu(): JSX.Element {
       const res: any = await getNoteCatalog()
       const menuItems: MenuItem[] = handleGetMenuItems(res.data)
       if (res.data.length > 0) {
-        setSelectedKeys([res.data[0].noteId])
+        let defaultKey = res.data[0].noteId
+        setSelectedKeys([defaultKey])
         setMenuItems(menuItems)
+        handleSelect(defaultKey)
       }
     } catch (error) {
       console.error('获取笔记目录失败:', error)
@@ -51,10 +57,21 @@ function SideMenu(): JSX.Element {
   // 递归获取菜单
   const handleGetMenuItems = (list: any[]): MenuItem[] => {
     return list.map((itemData: any): MenuItem => {
+      let icon: React.ReactNode | undefined = undefined
+      if (isURL(itemData.icon)) {
+        icon = <Avatar className={root.icon} size={22} src={itemData.icon} />
+      } else if (itemData.icon) {
+        icon = (
+          <Avatar className={root.icon} size={22} icon={<DynamicIcon iconName={itemData.icon} />} />
+        )
+      } else {
+        icon = <Avatar className={root.icon} size={22} icon={<AppstoreOutlined />} />
+      }
+
       const item: MenuItem = {
         key: itemData.noteId,
         label: itemData.title || '未命名',
-        icon: <AppstoreOutlined />
+        icon: icon
       }
 
       if (itemData.children && itemData.children.length > 0) {

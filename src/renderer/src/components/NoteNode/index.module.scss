@@ -1,0 +1,35 @@
+.node {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+
+  .menu {
+    transition: opacity 0.3s ease-in-out;
+  }
+  &.menuShow {
+    .menu {
+      opacity: 1;
+    }
+  }
+
+  &.menuHide {
+    .menu {
+      opacity: 0;
+    }
+  }
+
+  .children {
+    flex: 1;
+    margin-left: 4px;
+    border-radius: 6px;
+    transition: background-color 0.3s ease-in-out;
+  }
+
+  &.showBackground .children {
+    background-color: rgba($color: #cccccc, $alpha: 0.1);
+  }
+  &.hideBackground .children {
+    background-color: transparent;
+  }
+}

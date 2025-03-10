@@ -84,3 +84,24 @@ export function debounce(func: Function, wait: number, immediate: boolean = fals
     }
   }
 }
+
+/**
+ * 生成UUID
+ * @returns UUID
+ */
+export const getUUID = () => {
+  if (typeof window !== 'undefined' && window.crypto) {
+    return window.crypto.randomUUID()
+  }
+  // 可以考虑添加备用方案，例如使用第三方库如 uuid
+  throw new Error('无法生成 UUID，当前环境不支持')
+}
+
+/*
+ * 判断是否是URL
+ * @param url 跳转地址
+ */
+export const isURL = (url: string): Boolean => {
+  const urlRegex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/
+  return urlRegex.test(url)
+}
