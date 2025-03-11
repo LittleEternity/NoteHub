@@ -27,7 +27,7 @@ export default function Home(): React.ReactElement {
             <Outlet />
             <Routes>
               <Route path="user" element={<User />} />
-              <Route path=":noteIds/*" element={<Note />} />
+              <Route path=":noteId/*" element={<Note />} />
             </Routes>
           </Content>
         </Layout>

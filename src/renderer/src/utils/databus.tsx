@@ -11,6 +11,7 @@ let isRefreshing = false
 type RequestCallback = (token: string) => void
 // 存储因 token 过期而挂起的请求
 let requests: RequestCallback[] = []
+let params = {}
 
 databus.interceptors.request.use(
   (config: any) => {
@@ -25,6 +26,8 @@ databus.interceptors.request.use(
     if (config.method === 'post') {
       config.data = JSON.stringify(config.params)
       config.body = JSON.stringify(config.params)
+      params = { ...config.params }
+      console.log(params)
       config.params = ''
     }
     return config
@@ -41,8 +44,6 @@ databus.interceptors.response.use(
   async (error) => {
     const res = error.response
     const originalConfig = error.config
-
-    console.log(error)
 
     // 接口返回 code 为 401，表示 token 过期，需要重新登录
     if (res && res.data.code === 401) {
@@ -64,6 +65,12 @@ databus.interceptors.response.use(
           requests = []
 
           // 重新发起原请求
+          if (originalConfig.method === 'post') {
+            originalConfig.data = JSON.stringify(params)
+            originalConfig.body = JSON.stringify(params)
+            originalConfig.params = ''
+          }
+          params = {}
           return databus(originalConfig)
         } catch (refreshError) {
           // 刷新 token 失败，清除 token 并跳转到登录页

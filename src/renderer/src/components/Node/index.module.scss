@@ -5,7 +5,18 @@
   display: flex;
 
   .menu {
+    display: flex;
+    align-items: center;
     transition: opacity 0.3s ease-in-out;
+    &.heading1 {
+      height: 55px;
+    }
+    &.heading2 {
+      height: 46px;
+    }
+    &.heading3 {
+      height: 39px;
+    }
   }
   &.menuShow {
     .menu {

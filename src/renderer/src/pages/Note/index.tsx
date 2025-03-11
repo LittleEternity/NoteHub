@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import root from './index.module.scss'
-import { Input, Avatar } from 'antd'
+import { Input, Avatar, Empty } from 'antd'
 import { UserOutlined } from '@ant-design/icons'
 import { getNoteDetail, updateNote } from '@renderer/utils/services/note'
-import NoteText from '@renderer/components/NoteText'
 import { getUUID } from '@renderer/utils/utils'
+import commaLeft from '@renderer/assets/imgs/comma_left.jpg'
+import commaRight from '@renderer/assets/imgs/comma_right.jpg'
+import NodeText from '@renderer/components/NodeText'
 
 interface NoteDetail {
   id?: string
@@ -22,26 +24,29 @@ interface NoteContentItem {
 }
 
 const Note = (): React.ReactElement => {
-  const { noteIds } = useParams<{ noteIds: string }>()
+  const { noteId } = useParams<{ noteId: string }>()
   const [noteDetail, setNoteDetail] = useState<NoteDetail>({})
-  const [noteContent, setNoteContent] = useState<NoteContentItem[]>([
-    {
-      nodeId: '',
-      key: getUUID(),
-      type: 'text',
-      value: ''
-    }
-  ])
+  const [noteContent, setNoteContent] = useState<NoteContentItem[]>([])
   const [styles, setStyles] = useState<React.CSSProperties>({})
+  const [focusNodeId, setFocusNodeId] = useState<string>('')
+  let setFoucusNodeTimer
+
+  const init = () => {
+    setNoteDetail({})
+    setNoteContent([])
+    setStyles({})
+    setFocusNodeId('')
+  }
 
   useEffect(() => {
+    init()
     handleGetNoteDetail()
-  }, [])
+  }, [noteId])
 
   // 获取笔记详情
   const handleGetNoteDetail = async () => {
     try {
-      const res = await getNoteDetail({ noteId: noteIds || '' })
+      const res = await getNoteDetail({ noteId: noteId || '' })
       const detail = res.data as NoteDetail
       setNoteDetail(detail)
       if (detail.content && Array.isArray(detail.content) && detail.content.length > 0) {
@@ -71,51 +76,79 @@ const Note = (): React.ReactElement => {
     const newContent = [...noteContent]
     newContent[index].value = value
     setNoteContent(newContent)
-    if (index === noteContent.length - 1) {
-      if (value.trim() !== '') {
-        const newItem: NoteContentItem = {
-          nodeId: '',
-          key: getUUID(),
-          type: 'text',
-          value: ''
-        }
-        setNoteContent((prevContent) => [...prevContent, newItem])
-      }
-    }
   }
 
-  const onDeleteNode = (index) => {
-    const newContent = [...noteContent]
-    newContent.splice(index, 1)
-    console.log(newContent)
-    setNoteContent(newContent)
-  }
-
-  const onPressEnter = (index) => {
+  // 新增节点
+  const handleAddNode = (index: number = noteContent.length - 1) => {
+    const key = getUUID()
     const newItem: NoteContentItem = {
       nodeId: '',
-      key: getUUID(),
+      key,
       type: 'text',
       value: ''
     }
     const newContent = [...noteContent]
     newContent.splice(index + 1, 0, newItem)
     setNoteContent(newContent)
+    handleSetFoucusNodeId(key)
   }
 
+  // 删除节点
+  const onDeleteNode = (index, isSetPrevNodeFocus) => {
+    const newContent = [...noteContent]
+    newContent.splice(index, 1)
+    if (isSetPrevNodeFocus) {
+      console.log(newContent)
+      if (index) {
+        handleSetFoucusNodeId(noteContent[index - 1].key)
+      } else if (newContent.length > 0) {
+        handleSetFoucusNodeId(noteContent[0].key)
+      }
+    }
+    setNoteContent(newContent)
+  }
+
+  // 按下回车键回调
+  const onPressEnter = (index) => {
+    handleAddNode(index)
+  }
+
+  // 点击空白区域回调
+  const handleClickBlock = () => {
+    if (!noteContent.length || noteContent[noteContent.length - 1].value !== '') {
+      handleAddNode(noteContent.length - 1)
+    } else {
+      let key = noteContent[noteContent.length - 1].key
+      handleSetFoucusNodeId(key)
+    }
+  }
+
+  // 处理聚焦节点
+  const handleSetFoucusNodeId = (key) => {
+    setFocusNodeId('')
+    clearTimeout(setFoucusNodeTimer)
+    setFoucusNodeTimer = setTimeout(() => {
+      setFocusNodeId(key)
+    }, 100)
+  }
+
+  const handleSelectComponent = (index: number, type: string) => {
+    console.log('选择组件', type)
+    const newContent = [...noteContent]
+    newContent[index].type = type
+    newContent[index].value = ''
+    setNoteContent(newContent)
+    handleSetFoucusNodeId(newContent[index].key)
+  }
+
+  // 更新笔记
   const handleUpdateNote = () => {
     updateNote({
-      noteId: noteIds || '',
+      noteId: noteId || '',
       title: noteDetail.title || '',
       cover: noteDetail.cover || '',
       content: noteContent
     })
-      .then((res) => {
-        console.log(res)
-      })
-      .catch((res) => {
-        console.log(res)
-      })
   }
 
   useEffect(() => {
@@ -153,17 +186,27 @@ const Note = (): React.ReactElement => {
           />
         </div>
         <div className={root.content}>
+          <img className={root.commaLeft} src={commaLeft} />
+          <img className={root.commaRight} src={commaRight} />
           {noteContent.map((item, index) => (
             <React.Fragment key={item.key}>
-              <NoteText
-                index={index}
-                value={item.value}
-                onChange={onChangeText}
-                onDeleteNode={onDeleteNode}
-                onPressEnter={onPressEnter}
-              />
+              {(item.type === 'text' || item.type.includes('heading')) && (
+                <NodeText
+                  index={index}
+                  type={item.type}
+                  focus={item.key === focusNodeId}
+                  value={item.value}
+                  onChange={onChangeText}
+                  onDeleteNode={onDeleteNode}
+                  onPressEnter={onPressEnter}
+                  onChangeComponent={handleSelectComponent}
+                />
+              )}
             </React.Fragment>
           ))}
+          <div className={root.block} onClick={handleClickBlock}>
+            {noteContent.length === 0 && <Empty description="还没有写任何内容呢～" />}
+          </div>
         </div>
       </div>
     </div>

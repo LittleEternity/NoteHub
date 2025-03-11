@@ -7,6 +7,7 @@ import type { MenuProps } from 'antd'
 
 interface NoteNodeProps {
   children?: JSX.Element
+  type?: string
   onDelete: () => void
 }
 
@@ -23,7 +24,7 @@ const items: MenuProps['items'] = [
   }
 ]
 
-function NoteNode({ children, onDelete }: NoteNodeProps): JSX.Element {
+function NoteNode({ children, type, onDelete }: NoteNodeProps): JSX.Element {
   const [menuShow, setMenuShow] = useState(false)
   const [showBackground, setShowBackground] = useState(false)
 
@@ -32,7 +33,6 @@ function NoteNode({ children, onDelete }: NoteNodeProps): JSX.Element {
       case 'copy':
         break
       case 'delete':
-        console.log('删除')
         onDelete()
         break
     }
@@ -67,7 +67,9 @@ function NoteNode({ children, onDelete }: NoteNodeProps): JSX.Element {
           placement="bottomLeft"
           onOpenChange={onMenuOpenChange}
         >
-          <Button className={root.menu} type="text" icon={<HolderOutlined />} />
+          <div className={classNames(root.menu, root[type || 'base'])}>
+            <Button className={root.menuBtn} type="text" icon={<HolderOutlined />} />
+          </div>
         </Dropdown>
         <div className={root.children}>{children}</div>
       </div>

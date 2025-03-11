@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 export interface NavigationState {
-  collapsed: boolean
+  collapsed: boolean // 导航栏是否折叠
 }
 
 const initialState: NavigationState = {

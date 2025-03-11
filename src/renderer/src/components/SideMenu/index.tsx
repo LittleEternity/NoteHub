@@ -10,7 +10,7 @@ import classNames from 'classnames'
 import { useState, useEffect } from 'react'
 import { throttled, isURL } from '@renderer/utils/utils'
 import { getNoteCatalog } from '@renderer/utils/services/note'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 type MenuItem = Required<MenuProps>['items'][number] & {
   children?: MenuItem[]
@@ -27,9 +27,11 @@ function SideMenu(): JSX.Element {
   const [expanded, setExpanded] = useState(true)
   const collapsed = useSelector((state: RootState) => state.navigation.collapsed)
   const navigate = useNavigate()
+  const location = useLocation()
 
   const onClick: MenuProps['onClick'] = (e) => {
     handleSelect(e.key)
+    setSelectedKeys([e.key])
   }
   const onOpenChange: MenuProps['onOpenChange'] = (keys) => {
     console.log('onOpenChange ', keys)
@@ -45,6 +47,7 @@ function SideMenu(): JSX.Element {
       const res: any = await getNoteCatalog()
       const menuItems: MenuItem[] = handleGetMenuItems(res.data)
       if (res.data.length > 0) {
+        console.log(location)
         let defaultKey = res.data[0].noteId
         setSelectedKeys([defaultKey])
         setMenuItems(menuItems)

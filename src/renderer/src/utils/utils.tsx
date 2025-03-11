@@ -38,6 +38,9 @@ export function getUser(): Object {
 
 /**
  * 节流函数
+ * @param fn 函数
+ * @param delay 延迟执行毫秒数
+ * @returns {Function}
  */
 export function throttled(fn: Function, delay: number = 50): Function {
   let timer: any = null
@@ -61,6 +64,10 @@ export function throttled(fn: Function, delay: number = 50): Function {
 
 /**
  * 防抖函数
+ * @param func 函数
+ * @param wait 延迟执行毫秒数
+ * @param immediate true 表立即执行，false 表非立即执行
+ * @returns {Function}
  */
 export function debounce(func: Function, wait: number, immediate: boolean = false): Function {
   let timeout: any = null
