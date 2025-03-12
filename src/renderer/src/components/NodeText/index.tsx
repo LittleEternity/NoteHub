@@ -10,10 +10,12 @@ interface NoteTextProps {
   type: string
   value: string
   focus?: Boolean
+  cursorPosition: number
   onChange: (index: number, value: string) => void
   onPressEnter: (index: number) => void
   onDeleteNode: (index: number, isSetPrevNodeFocus?: Boolean) => void
   onChangeComponent: (index: number, type: string) => void
+  onChangeFocus: (index: number, position: number) => void
 }
 
 function NoteText({
@@ -21,10 +23,12 @@ function NoteText({
   type,
   value,
   focus,
+  cursorPosition,
   onChange,
   onPressEnter,
   onDeleteNode,
-  onChangeComponent
+  onChangeComponent,
+  onChangeFocus
 }: NoteTextProps): JSX.Element {
   const inputRef = useRef<any>(null)
   const [showSelection, setShowSelection] = useState<Boolean>(false)
@@ -68,6 +72,28 @@ function NoteText({
         onDeleteNode(index, true)
       }
     }
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      const textarea = inputRef.current?.resizableTextArea.textArea
+      if (textarea) {
+        // 获取光标位置
+        const cursorPosition = textarea.selectionStart
+        // 获取文本内容
+        const text = textarea.value
+        if (cursorPosition === text.length) {
+          // 滚动到底部，执行相应操作
+          if (e.key === 'ArrowDown') {
+            e.preventDefault()
+            onChangeFocus(index + 1, 0)
+          }
+        }
+        if (!cursorPosition) {
+          if (e.key === 'ArrowUp') {
+            e.preventDefault()
+            onChangeFocus(index > 0 ? index - 1 : 0, -1)
+          }
+        }
+      }
+    }
   }
 
   // 选择节点组件回调
@@ -80,7 +106,8 @@ function NoteText({
     if (focus) {
       if (inputRef.current) {
         inputRef.current.focus()
-        inputRef.current.resizableTextArea.textArea.setSelectionRange(value.length, value.length) // 将光标移动到尾部
+        let index = cursorPosition >= 0 ? cursorPosition : value.length
+        inputRef.current.resizableTextArea.textArea.setSelectionRange(index, index) // 将光标移动到尾部
       }
     }
   }, [focus])

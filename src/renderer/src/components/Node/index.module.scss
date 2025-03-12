@@ -5,6 +5,7 @@
   display: flex;
 
   .menu {
+    height: 33px;
     display: flex;
     align-items: center;
     transition: opacity 0.3s ease-in-out;
@@ -38,7 +39,7 @@
   }
 
   &.showBackground .children {
-    background-color: rgba($color: #cccccc, $alpha: 0.1);
+    background-color: rgba($color: #cccccc, $alpha: 0.2);
   }
   &.hideBackground .children {
     background-color: transparent;

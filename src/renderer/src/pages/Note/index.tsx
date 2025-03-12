@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import root from './index.module.scss'
 import { Input, Avatar, Empty } from 'antd'
-import { UserOutlined } from '@ant-design/icons'
+import { ReadOutlined } from '@ant-design/icons'
 import { getNoteDetail, updateNote } from '@renderer/utils/services/note'
 import { getUUID } from '@renderer/utils/utils'
 import commaLeft from '@renderer/assets/imgs/comma_left.jpg'
@@ -29,6 +29,7 @@ const Note = (): React.ReactElement => {
   const [noteContent, setNoteContent] = useState<NoteContentItem[]>([])
   const [styles, setStyles] = useState<React.CSSProperties>({})
   const [focusNodeId, setFocusNodeId] = useState<string>('')
+  const [cursorPosition, setCursorPosition] = useState<number>(0)
   let setFoucusNodeTimer
 
   const init = () => {
@@ -72,7 +73,7 @@ const Note = (): React.ReactElement => {
   }
 
   // 默认的文本域修改回调
-  const onChangeText = (index, value) => {
+  const onChangeText = (index: number, value: any): void => {
     const newContent = [...noteContent]
     newContent[index].value = value
     setNoteContent(newContent)
@@ -98,7 +99,6 @@ const Note = (): React.ReactElement => {
     const newContent = [...noteContent]
     newContent.splice(index, 1)
     if (isSetPrevNodeFocus) {
-      console.log(newContent)
       if (index) {
         handleSetFoucusNodeId(noteContent[index - 1].key)
       } else if (newContent.length > 0) {
@@ -109,12 +109,12 @@ const Note = (): React.ReactElement => {
   }
 
   // 按下回车键回调
-  const onPressEnter = (index) => {
+  const onPressEnter = (index): void => {
     handleAddNode(index)
   }
 
   // 点击空白区域回调
-  const handleClickBlock = () => {
+  const handleClickBlock = (): void => {
     if (!noteContent.length || noteContent[noteContent.length - 1].value !== '') {
       handleAddNode(noteContent.length - 1)
     } else {
@@ -124,7 +124,7 @@ const Note = (): React.ReactElement => {
   }
 
   // 处理聚焦节点
-  const handleSetFoucusNodeId = (key) => {
+  const handleSetFoucusNodeId = (key: string): void => {
     setFocusNodeId('')
     clearTimeout(setFoucusNodeTimer)
     setFoucusNodeTimer = setTimeout(() => {
@@ -132,13 +132,20 @@ const Note = (): React.ReactElement => {
     }, 100)
   }
 
+  // 处理选择组件回调
   const handleSelectComponent = (index: number, type: string) => {
-    console.log('选择组件', type)
     const newContent = [...noteContent]
     newContent[index].type = type
     newContent[index].value = ''
     setNoteContent(newContent)
     handleSetFoucusNodeId(newContent[index].key)
+  }
+
+  // 处理聚焦节点
+  const handleChangeFocus = (index: number, position: number = -1) => {
+    let i = index > noteContent.length - 1 ? noteContent.length - 1 : index
+    handleSetFoucusNodeId(noteContent[i].key)
+    setCursorPosition(position)
   }
 
   // 更新笔记
@@ -169,7 +176,7 @@ const Note = (): React.ReactElement => {
       <div className={root.cover} style={styles}></div>
       <div className={root.container}>
         <div className={root.header}>
-          <Avatar className={root.icon} size={76} icon={<UserOutlined />} />
+          <Avatar className={root.icon} size={76} icon={<ReadOutlined />} />
           <Input
             classNames={{
               input: root.input
@@ -195,11 +202,13 @@ const Note = (): React.ReactElement => {
                   index={index}
                   type={item.type}
                   focus={item.key === focusNodeId}
+                  cursorPosition={cursorPosition}
                   value={item.value}
                   onChange={onChangeText}
                   onDeleteNode={onDeleteNode}
                   onPressEnter={onPressEnter}
                   onChangeComponent={handleSelectComponent}
+                  onChangeFocus={handleChangeFocus}
                 />
               )}
             </React.Fragment>

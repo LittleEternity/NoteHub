@@ -27,7 +27,6 @@ databus.interceptors.request.use(
       config.data = JSON.stringify(config.params)
       config.body = JSON.stringify(config.params)
       params = { ...config.params }
-      console.log(params)
       config.params = ''
     }
     return config
@@ -66,9 +65,11 @@ databus.interceptors.response.use(
 
           // 重新发起原请求
           if (originalConfig.method === 'post') {
+            console.log(params)
             originalConfig.data = JSON.stringify(params)
             originalConfig.body = JSON.stringify(params)
             originalConfig.params = ''
+            console.log(originalConfig.body)
           }
           params = {}
           return databus(originalConfig)
