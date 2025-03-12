@@ -1,2 +1,18 @@
 .page {
+  margin: 6px 10px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  background-color: rgba($color: #cccccc, $alpha: 0.2);
+  cursor: pointer;
+  .icon {
+    background-color: #ffffff;
+    color: #aaaaaa;
+  }
+  .title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-left: 6px;
+  }
 }

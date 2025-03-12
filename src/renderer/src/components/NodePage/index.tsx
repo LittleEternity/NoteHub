@@ -1,9 +1,39 @@
 import root from './index.module.scss'
+import Node from '@renderer/components/Node'
+import { Avatar } from 'antd'
+import { ReadOutlined } from '@ant-design/icons'
+import { useNavigate } from 'react-router-dom'
 
-function NodePage(): JSX.Element {
+interface NodePageProps {
+  type: string
+  index: number
+  message: NodePageMessage
+  onDeleteNode: (index: number, isSetPrevNodeFocus?: Boolean) => void
+}
+
+interface NodePageMessage {
+  noteId: string
+  title: string
+  cover?: string
+  updatedAt: string
+}
+
+function NodePage({ type, index, message, onDeleteNode }: NodePageProps): JSX.Element {
+  const navigate = useNavigate()
+  const handleDeleteNode = (index) => {
+    onDeleteNode(index, true)
+  }
+  const handleClick = () => {
+    navigate(`/${message.noteId}`)
+  }
   return (
     <>
-      <div className={root.page}></div>
+      <Node type={type} onDelete={() => handleDeleteNode(index)}>
+        <div className={root.page} onClick={handleClick}>
+          <Avatar className={root.icon} size={34} icon={<ReadOutlined />} />
+          <div className={root.title}>{message.title}</div>
+        </div>
+      </Node>
     </>
   )
 }

@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import root from './index.module.scss'
 import { Input, Avatar, Empty } from 'antd'
 import { ReadOutlined } from '@ant-design/icons'
-import { getNoteDetail, updateNote } from '@renderer/utils/services/note'
+import { getNoteDetail, updateNote, addNote } from '@renderer/utils/services/note'
 import { getUUID } from '@renderer/utils/utils'
 import commaLeft from '@renderer/assets/imgs/comma_left.jpg'
 import commaRight from '@renderer/assets/imgs/comma_right.jpg'
 import NodeText from '@renderer/components/NodeText'
+import NodePage from '@renderer/components/NodePage'
 
 interface NoteDetail {
-  id?: string
+  noteId?: string
   title?: string
   cover?: string
   content?: NoteContentItem[]
@@ -20,7 +21,7 @@ interface NoteContentItem {
   nodeId: string
   key: string
   type: string
-  value: string
+  value: any
 }
 
 const Note = (): React.ReactElement => {
@@ -30,6 +31,7 @@ const Note = (): React.ReactElement => {
   const [styles, setStyles] = useState<React.CSSProperties>({})
   const [focusNodeId, setFocusNodeId] = useState<string>('')
   const [cursorPosition, setCursorPosition] = useState<number>(0)
+  const navigate = useNavigate()
   let setFoucusNodeTimer
 
   const init = () => {
@@ -133,12 +135,21 @@ const Note = (): React.ReactElement => {
   }
 
   // 处理选择组件回调
-  const handleSelectComponent = (index: number, type: string) => {
+  const handleSelectComponent = async (index: number, type: string) => {
     const newContent = [...noteContent]
     newContent[index].type = type
-    newContent[index].value = ''
+
     setNoteContent(newContent)
-    handleSetFoucusNodeId(newContent[index].key)
+    if (type === 'page') {
+      const res = await addNote({ parentNoteId: noteId })
+      const newNote = res.data as NoteDetail
+      newContent[index].value = newNote.noteId
+      handleUpdateNote()
+      navigate(`/${newNote.noteId}`)
+    } else {
+      newContent[index].value = ''
+      handleSetFoucusNodeId(newContent[index].key)
+    }
   }
 
   // 处理聚焦节点
@@ -209,6 +220,14 @@ const Note = (): React.ReactElement => {
                   onPressEnter={onPressEnter}
                   onChangeComponent={handleSelectComponent}
                   onChangeFocus={handleChangeFocus}
+                />
+              )}
+              {item.type === 'page' && (
+                <NodePage
+                  index={index}
+                  type={item.type}
+                  message={item.value}
+                  onDeleteNode={onDeleteNode}
                 />
               )}
             </React.Fragment>
