@@ -1,5 +1,5 @@
 import axios from './axios'
-import { redirectTo } from './utils'
+import { redirectTo, deepClone } from './utils'
 import { message } from 'antd'
 
 const databus = axios.create({
@@ -26,7 +26,6 @@ databus.interceptors.request.use(
     if (config.method === 'post') {
       config.data = JSON.stringify(config.params)
       config.body = JSON.stringify(config.params)
-      params = { ...config.params }
       config.params = ''
     }
     return config
@@ -43,6 +42,7 @@ databus.interceptors.response.use(
   async (error) => {
     const res = error.response
     const originalConfig = error.config
+    let params = JSON.parse(originalConfig.body)
 
     // 接口返回 code 为 401，表示 token 过期，需要重新登录
     if (res && res.data.code === 401) {
@@ -65,11 +65,7 @@ databus.interceptors.response.use(
 
           // 重新发起原请求
           if (originalConfig.method === 'post') {
-            console.log(params)
-            originalConfig.data = JSON.stringify(params)
-            originalConfig.body = JSON.stringify(params)
-            originalConfig.params = ''
-            console.log(originalConfig.body)
+            originalConfig.params = deepClone(params)
           }
           params = {}
           return databus(originalConfig)

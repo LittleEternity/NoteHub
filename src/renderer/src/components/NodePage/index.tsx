@@ -7,9 +7,7 @@ import { useNavigate } from 'react-router-dom'
 interface NodePageProps {
   nodeId: string
   type: string
-  index: number
   message: NodePageMessage
-  onDeleteNode: (index: number, isSetPrevNodeFocus?: Boolean) => void
 }
 
 interface NodePageMessage {

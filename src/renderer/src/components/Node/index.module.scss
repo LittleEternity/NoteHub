@@ -8,6 +8,7 @@
     height: 33px;
     display: flex;
     align-items: center;
+    opacity: 0;
     transition: opacity 0.3s ease-in-out;
     &.heading1 {
       height: 55px;
@@ -19,15 +20,9 @@
       height: 39px;
     }
   }
-  &.menuShow {
+  &:hover {
     .menu {
       opacity: 1;
-    }
-  }
-
-  &.menuHide {
-    .menu {
-      opacity: 0;
     }
   }
 
@@ -56,6 +51,33 @@
       bottom: 0;
       background-color: rgba($color: #efefef, $alpha: 0.6);
       border-radius: 6px;
+      z-index: 1;
+    }
+  }
+
+  &.hover.hoverTop {
+    .children::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      border-radius: 2px;
+      background-color: #efefef;
+      z-index: 1;
+    }
+  }
+  &.hover.hoverBottom {
+    .children::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      border-radius: 2px;
+      background-color: #efefef;
       z-index: 1;
     }
   }

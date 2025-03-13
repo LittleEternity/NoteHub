@@ -267,13 +267,7 @@ const Note = (): React.ReactElement => {
                 />
               )}
               {item.type === 'page' && (
-                <NodePage
-                  nodeId={item.key}
-                  index={index}
-                  type={item.type}
-                  message={item.value}
-                  onDeleteNode={onDeleteNode}
-                />
+                <NodePage nodeId={item.key} type={item.type} message={item.value} />
               )}
             </React.Fragment>
           ))}
