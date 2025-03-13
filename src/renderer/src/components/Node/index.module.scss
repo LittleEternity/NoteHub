@@ -32,6 +32,7 @@
   }
 
   .children {
+    position: relative;
     flex: 1;
     margin-left: 4px;
     border-radius: 6px;
@@ -39,9 +40,23 @@
   }
 
   &.showBackground .children {
-    background-color: rgba($color: #cccccc, $alpha: 0.2);
+    background-color: rgba($color: #efefef, $alpha: 0.5);
   }
   &.hideBackground .children {
     background-color: transparent;
+  }
+
+  &.drag {
+    .children::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba($color: #efefef, $alpha: 0.6);
+      border-radius: 6px;
+      z-index: 1;
+    }
   }
 }

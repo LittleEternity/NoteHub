@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from 'react'
 import classNames from 'classnames'
 
 interface NoteTextProps {
+  nodeId: string
   index: number
   type: string
   value: string
@@ -19,6 +20,7 @@ interface NoteTextProps {
 }
 
 function NoteText({
+  nodeId,
   index,
   type,
   value,
@@ -114,7 +116,7 @@ function NoteText({
 
   return (
     <>
-      <Node type={type} onDelete={() => onDeleteNode(index)}>
+      <Node nodeId={nodeId} type={type}>
         <div className={root.nodeText}>
           <NodeSelection show={showSelection} onChange={handleChangeComponent}>
             <Input.TextArea

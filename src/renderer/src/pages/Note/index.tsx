@@ -5,10 +5,13 @@ import { Input, Avatar, Empty } from 'antd'
 import { ReadOutlined } from '@ant-design/icons'
 import { getNoteDetail, updateNote, addNote } from '@renderer/utils/services/note'
 import { getUUID } from '@renderer/utils/utils'
+import { RootState } from '@renderer/store'
+import { useDispatch, useSelector } from 'react-redux'
 import commaLeft from '@renderer/assets/imgs/comma_left.jpg'
 import commaRight from '@renderer/assets/imgs/comma_right.jpg'
 import NodeText from '@renderer/components/NodeText'
 import NodePage from '@renderer/components/NodePage'
+import { setMoveFinish } from '@renderer/store/nodeSlice'
 
 interface NoteDetail {
   noteId?: string
@@ -25,12 +28,17 @@ interface NoteContentItem {
 }
 
 const Note = (): React.ReactElement => {
+  const dispatch = useDispatch()
   const { noteId } = useParams<{ noteId: string }>()
   const [noteDetail, setNoteDetail] = useState<NoteDetail>({})
   const [noteContent, setNoteContent] = useState<NoteContentItem[]>([])
   const [styles, setStyles] = useState<React.CSSProperties>({})
   const [focusNodeId, setFocusNodeId] = useState<string>('')
   const [cursorPosition, setCursorPosition] = useState<number>(0)
+  const deleteNodeId = useSelector((state: RootState) => state.node.deleteNodeId) // 是否移动节点
+  const isMoveNode = useSelector((state: RootState) => state.node.isMoveNode) // 是否移动节点
+  const moveSourceId = useSelector((state: RootState) => state.node.moveSourceId) // 移动原节点 ID
+  const moveTargetId = useSelector((state: RootState) => state.node.moveTargetId) // 移动目标节点 ID
   const navigate = useNavigate()
   let setFoucusNodeTimer
 
@@ -110,6 +118,15 @@ const Note = (): React.ReactElement => {
     setNoteContent(newContent)
   }
 
+  useEffect(() => {
+    if (deleteNodeId) {
+      const index = noteContent.findIndex((item) => item.key === deleteNodeId)
+      if (index !== -1) {
+        onDeleteNode(index, false)
+      }
+    }
+  }, [deleteNodeId])
+
   // 按下回车键回调
   const onPressEnter = (index): void => {
     handleAddNode(index)
@@ -143,7 +160,9 @@ const Note = (): React.ReactElement => {
     if (type === 'page') {
       const res = await addNote({ parentNoteId: noteId })
       const newNote = res.data as NoteDetail
-      newContent[index].value = newNote.noteId
+      newContent[index].value = {
+        noteId: newNote.noteId
+      }
       handleUpdateNote()
       navigate(`/${newNote.noteId}`)
     } else {
@@ -168,6 +187,30 @@ const Note = (): React.ReactElement => {
       content: noteContent
     })
   }
+
+  // 移动节点位置
+  const handleChangePosition = (source: string, target: string) => {
+    // 找到 key 为 target 的项目的索引
+    const sourceIndex = noteContent.findIndex((item) => item.key === source)
+    const targetIndex = noteContent.findIndex((item) => item.key === target)
+    if (sourceIndex === -1 || targetIndex === -1) {
+      return
+    }
+    // 创建一个新的 noteContent 副本
+    const newContent = [...noteContent]
+    const [item] = newContent.splice(sourceIndex, 1)
+    newContent.splice(targetIndex, 0, item)
+    // 更新 noteContent 状态
+    setNoteContent(newContent)
+    dispatch(setMoveFinish())
+  }
+
+  // 处理移动节点
+  useEffect(() => {
+    if (isMoveNode) {
+      handleChangePosition(moveSourceId, moveTargetId)
+    }
+  }, [isMoveNode])
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -210,6 +253,7 @@ const Note = (): React.ReactElement => {
             <React.Fragment key={item.key}>
               {(item.type === 'text' || item.type.includes('heading')) && (
                 <NodeText
+                  nodeId={item.key}
                   index={index}
                   type={item.type}
                   focus={item.key === focusNodeId}
@@ -224,6 +268,7 @@ const Note = (): React.ReactElement => {
               )}
               {item.type === 'page' && (
                 <NodePage
+                  nodeId={item.key}
                   index={index}
                   type={item.type}
                   message={item.value}
