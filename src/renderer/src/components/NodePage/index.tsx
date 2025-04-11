@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 
 interface NodePageProps {
   nodeId: string
+  nodeIdList: Array<string>
   type: string
   message: NodePageMessage
 }
@@ -17,7 +18,7 @@ interface NodePageMessage {
   updatedAt: string
 }
 
-function NodePage({ nodeId, type, message }: NodePageProps): JSX.Element {
+function NodePage({ nodeId, nodeIdList, type, message }: NodePageProps): JSX.Element {
   const navigate = useNavigate()
 
   const handleClick = () => {
@@ -25,7 +26,7 @@ function NodePage({ nodeId, type, message }: NodePageProps): JSX.Element {
   }
   return (
     <>
-      <Node nodeId={nodeId} type={type}>
+      <Node nodeId={nodeId} nodeIdList={nodeIdList} type={type}>
         <div className={root.page} onClick={handleClick}>
           <Avatar className={root.icon} size={34} icon={<ReadOutlined />} />
           <div className={root.title}>{message.title}</div>

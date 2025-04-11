@@ -1,9 +1,37 @@
 .note {
   position: relative;
-  height: 100%;
+  min-height: 100%;
   width: 100%;
   display: flex;
   flex-direction: column;
+  .navigation {
+    height: 40px;
+    font-size: 14px;
+    padding: 0 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    .navigationList {
+      display: flex;
+      align-items: center;
+      .navigationItem {
+        position: relative;
+        padding-left: 14px;
+        cursor: pointer;
+        &:hover {
+          text-decoration: underline;
+        }
+        &::before {
+          content: '/';
+          position: absolute;
+          top: 50%;
+          left: 0;
+          color: #aaaaaa;
+          transform: translate(7px, -50%);
+        }
+      }
+    }
+  }
   .cover {
     width: 100%;
     height: var(--note-cover-height);
@@ -18,7 +46,9 @@
     flex: 1;
     position: relative;
     margin: 0 50px;
-
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
     .header {
       position: absolute;
       top: -20px;
@@ -42,12 +72,11 @@
     }
 
     .content {
+      flex: 1;
       position: relative;
+      width: 100%;
       padding: 100px 0 40px;
-      height: 100%;
       box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
 
       .commaLeft,
       .commaRight {

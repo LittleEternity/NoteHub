@@ -11,6 +11,7 @@ import { useState, useEffect } from 'react'
 import { throttled, isURL } from '@renderer/utils/utils'
 import { getNoteCatalog } from '@renderer/utils/services/note'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { recordPathChain } from '@renderer/utils/note'
 
 type MenuItem = Required<MenuProps>['items'][number] & {
   children?: MenuItem[]
@@ -30,14 +31,18 @@ function SideMenu(): JSX.Element {
   const location = useLocation()
 
   const onClick: MenuProps['onClick'] = (e) => {
-    handleSelect(e.key)
+    handleSelect(e.key, e.keyPath)
     setSelectedKeys([e.key])
   }
   const onOpenChange: MenuProps['onOpenChange'] = (keys) => {
     console.log('onOpenChange ', keys)
   }
 
-  const handleSelect = (key: string) => {
+  const handleSelect = (key: string, path?) => {
+    recordPathChain({
+      noteId: key,
+      pathChain: path && path.length ? path.reverse() : []
+    })
     navigate(`/${key}`)
   }
 
@@ -47,7 +52,6 @@ function SideMenu(): JSX.Element {
       const res: any = await getNoteCatalog()
       const menuItems: MenuItem[] = handleGetMenuItems(res.data)
       if (res.data.length > 0) {
-        console.log(location)
         let defaultKey = res.data[0].noteId
         setSelectedKeys([defaultKey])
         setMenuItems(menuItems)

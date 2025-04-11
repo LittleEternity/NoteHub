@@ -7,6 +7,7 @@ import classNames from 'classnames'
 
 interface NoteTextProps {
   nodeId: string
+  nodeIdList: Array<string>
   index: number
   type: string
   value: string
@@ -21,6 +22,7 @@ interface NoteTextProps {
 
 function NoteText({
   nodeId,
+  nodeIdList,
   index,
   type,
   value,
@@ -116,7 +118,7 @@ function NoteText({
 
   return (
     <>
-      <Node nodeId={nodeId} type={type}>
+      <Node nodeId={nodeId} nodeIdList={nodeIdList} type={type}>
         <div className={root.nodeText}>
           <NodeSelection show={showSelection} onChange={handleChangeComponent}>
             <Input.TextArea

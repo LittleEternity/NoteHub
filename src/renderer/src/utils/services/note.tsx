@@ -12,7 +12,7 @@ export const getNoteList = (data: Object = {}) =>
 export const getNoteDetail = (data: Object = {}) =>
   databus({
     url: '/api/note/detail',
-    method: 'get',
+    method: 'post',
     params: data
   })
 

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import root from './index.module.scss'
-import { Input, Avatar, Empty } from 'antd'
-import { ReadOutlined } from '@ant-design/icons'
-import { getNoteDetail, updateNote, addNote } from '@renderer/utils/services/note'
+import { Input, Avatar, Empty, Button, message } from 'antd'
+import { ReadOutlined, DeleteOutlined } from '@ant-design/icons'
+import { getNoteDetail, updateNote, addNote, deleteNote } from '@renderer/utils/services/note'
 import { getUUID } from '@renderer/utils/utils'
 import { RootState } from '@renderer/store'
 import { useDispatch, useSelector } from 'react-redux'
@@ -12,12 +12,19 @@ import commaRight from '@renderer/assets/imgs/comma_right.jpg'
 import NodeText from '@renderer/components/NodeText'
 import NodePage from '@renderer/components/NodePage'
 import { setMoveFinish } from '@renderer/store/nodeSlice'
+import { getPathChain, recordPathChain } from '@renderer/utils/note'
 
 interface NoteDetail {
   noteId?: string
   title?: string
   cover?: string
   content?: NoteContentItem[]
+  path?: pathItem[]
+}
+
+interface pathItem {
+  noteId: string
+  title: string
 }
 
 interface NoteContentItem {
@@ -32,6 +39,7 @@ const Note = (): React.ReactElement => {
   const { noteId } = useParams<{ noteId: string }>()
   const [noteDetail, setNoteDetail] = useState<NoteDetail>({})
   const [noteContent, setNoteContent] = useState<NoteContentItem[]>([])
+  const [nodeIdList, setNodeIdList] = useState<string[]>([])
   const [styles, setStyles] = useState<React.CSSProperties>({})
   const [focusNodeId, setFocusNodeId] = useState<string>('')
   const [cursorPosition, setCursorPosition] = useState<number>(0)
@@ -51,13 +59,31 @@ const Note = (): React.ReactElement => {
 
   useEffect(() => {
     init()
+    handleRecordPath()
     handleGetNoteDetail()
   }, [noteId])
+
+  const handleRecordPath = () => {
+    const path = getPathChain()
+    recordPathChain({
+      noteId: noteId || '',
+      pathChain: path
+    })
+  }
+
+  useEffect(() => {
+    let list = noteContent.map((item) => item.key)
+    if (JSON.stringify(list) !== JSON.stringify(nodeIdList)) setNodeIdList(list)
+  }, [JSON.stringify(noteContent)])
 
   // 获取笔记详情
   const handleGetNoteDetail = async () => {
     try {
-      const res = await getNoteDetail({ noteId: noteId || '' })
+      let pathChain = getPathChain()
+      const res = await getNoteDetail({
+        noteId: noteId || '',
+        pathChain: pathChain.filter((item) => item !== noteId)
+      })
       const detail = res.data as NoteDetail
       setNoteDetail(detail)
       if (detail.content && Array.isArray(detail.content) && detail.content.length > 0) {
@@ -225,8 +251,44 @@ const Note = (): React.ReactElement => {
     }
   }, [handleUpdateNote])
 
+  const handleToNote = (e) => {
+    const { noteId } = e.target.dataset
+    navigate(`/${noteId}`)
+  }
+
+  const handleDeleteNote = () => {
+    deleteNote({
+      noteId: noteId || ''
+    }).then(() => {
+      message.success('删除成功!')
+      navigate('/')
+    })
+  }
+
   return (
     <div className={root.note}>
+      <div className={root.navigation}>
+        <div className={root.navigationList}>
+          {noteDetail.path &&
+            noteDetail.path.map((item) => {
+              return (
+                <div
+                  key={item.noteId}
+                  data-note-id={item.noteId}
+                  className={root.navigationItem}
+                  onClick={handleToNote}
+                >
+                  {item.title || '未命名'}
+                </div>
+              )
+            })}
+        </div>
+        <div className={root.delete}>
+          <Button type="text" icon={<DeleteOutlined />} onClick={handleDeleteNote}>
+            删除
+          </Button>
+        </div>
+      </div>
       <div className={root.cover} style={styles}></div>
       <div className={root.container}>
         <div className={root.header}>
@@ -254,6 +316,7 @@ const Note = (): React.ReactElement => {
               {(item.type === 'text' || item.type.includes('heading')) && (
                 <NodeText
                   nodeId={item.key}
+                  nodeIdList={nodeIdList}
                   index={index}
                   type={item.type}
                   focus={item.key === focusNodeId}
@@ -267,7 +330,12 @@ const Note = (): React.ReactElement => {
                 />
               )}
               {item.type === 'page' && (
-                <NodePage nodeId={item.key} type={item.type} message={item.value} />
+                <NodePage
+                  nodeId={item.key}
+                  nodeIdList={nodeIdList}
+                  type={item.type}
+                  message={item.value}
+                />
               )}
             </React.Fragment>
           ))}

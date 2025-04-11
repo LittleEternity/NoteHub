@@ -1,6 +1,6 @@
 import root from './index.module.scss'
 import { Button, Dropdown } from 'antd'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import classNames from 'classnames'
 import { CopyOutlined, DeleteOutlined, HolderOutlined } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
@@ -16,6 +16,7 @@ import { useDrag, useDrop } from 'react-dnd'
 
 interface NoteNodeProps {
   nodeId: string
+  nodeIdList: Array<string>
   children?: JSX.Element
   type?: string
 }
@@ -33,8 +34,9 @@ const items: MenuProps['items'] = [
   }
 ]
 let targetId = ''
+let idList: string[] = []
 
-function NoteNode({ nodeId, type, children }: NoteNodeProps): JSX.Element {
+function NoteNode({ nodeId, nodeIdList, type, children }: NoteNodeProps): JSX.Element {
   const dispatch = useDispatch()
   const [showBackground, setShowBackground] = useState<Boolean>(false)
   const [topOfBottom, setTopOfBottom] = useState<String>('')
@@ -58,6 +60,9 @@ function NoteNode({ nodeId, type, children }: NoteNodeProps): JSX.Element {
       if (targetId !== nodeId) {
         targetId = nodeId
         dispatch(setMoveTarget(nodeId))
+        const sourceIndex = idList.findIndex((id) => id === item.id)
+        const targetIndex = idList.findIndex((id) => id === nodeId)
+        setTopOfBottom(targetIndex > sourceIndex ? 'bottom' : 'top')
       }
     },
     drop: (item: any) => {
@@ -67,6 +72,10 @@ function NoteNode({ nodeId, type, children }: NoteNodeProps): JSX.Element {
       targetId = ''
     }
   }))
+
+  useEffect(() => {
+    idList = nodeIdList
+  }, [JSON.stringify(nodeIdList)])
 
   const handleMenuClick = (e) => {
     switch (e.key) {

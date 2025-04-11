@@ -19,7 +19,7 @@ export default defineConfig({
     server: {
       proxy: {
         '/dev': {
-          target: 'http://localhost:3000/', // 你的后端服务器地址
+          target: 'http://localhost:3002/', // 你的后端服务器地址
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/dev/, '')
         }

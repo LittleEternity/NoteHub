@@ -30,7 +30,6 @@ function Navigation(): JSX.Element {
 
   const handleAddNote = () => {
     addNote().then((res) => {
-      console.log('res', res)
       navigate(`/${res.data.noteId}`)
     })
   }
